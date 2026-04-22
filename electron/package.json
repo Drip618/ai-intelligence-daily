@@ -1,0 +1,34 @@
+{
+  "name": "ai-intelligence-daily",
+  "version": "1.0.0",
+  "description": "AI Intelligence Daily - 全球资讯速递桌面应用",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
+  },
+  "keywords": ["ai", "news", "daily", "intelligence"],
+  "author": "AI Intelligence Daily",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.aiintelligence.daily",
+    "productName": "AI Intelligence Daily",
+    "mac": {
+      "category": "public.app-category.news",
+      "icon": "build/icon.icns"
+    },
+    "win": {
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "category": "News"
+    }
+  }
+}

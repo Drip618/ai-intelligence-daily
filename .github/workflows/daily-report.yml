@@ -1,0 +1,74 @@
+name: Daily Report Generator
+
+on:
+  schedule:
+    # 每天 UTC 时间 00:00 (北京时间 08:00) 运行
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # 允许手动触发
+    inputs:
+      date:
+        description: '报告日期 (YYYY-MM-DD)'
+        required: false
+        default: ''
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 设置 Python 环境
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: 安装依赖
+      run: |
+        pip install -r requirements.txt
+        # 安装 weasyprint 的系统依赖
+        sudo apt-get update
+        sudo apt-get install -y build-essential python3-dev python3-pip python3-setuptools python3-wheel python3-cffi libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+
+    - name: 创建配置文件
+      run: |
+        mkdir -p config
+        echo '{}' > config/user_config.json
+
+    - name: 运行数据获取
+      env:
+        DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        DATE=${{ github.event.inputs.date || '' }}
+        if [ -z "$DATE" ]; then
+          python3 generate_report.py --no-ai
+        else
+          python3 generate_report.py --date "$DATE" --no-ai
+        fi
+
+    - name: 生成 HTML 和 PDF
+      run: |
+        DATE=${{ github.event.inputs.date || '' }}
+        if [ -z "$DATE" ]; then
+          python3 generate_browser_friendly.py
+        else
+          python3 generate_browser_friendly.py --date "$DATE"
+        fi
+
+    - name: 上传报告到 Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: daily-report
+        path: |
+          output/Daily_Report_*.html
+          output/Daily_Report_*.pdf
+
+    - name: 部署到 GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./output
+        keep_files: true
+        commit_message: '📊 自动生成每日报告'

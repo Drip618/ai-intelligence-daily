@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# 虚拟环境
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# 输出文件（不提交）
+output/
+Daily_Report_*.html
+Daily_Report_*.pdf
+
+# 数据文件（不提交）
+data/
+knowledge/
+
+# 环境文件（包含敏感信息）
+.env
+
+# Electron
+node_modules/
+electron/build/
+
+# 日志
+*.log
+
+# 计划文档
+PLAN.md
