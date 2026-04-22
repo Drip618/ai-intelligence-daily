@@ -1,0 +1,10 @@
+platform :ios, '13.0'
+
+target 'App' do
+  use_frameworks!
+  pod 'Capacitor', :path => '../node_modules/@capacitor/ios'
+  pod 'CapacitorApp', :path => '../node_modules/@capacitor/app'
+  pod 'CapacitorToast', :path => '../node_modules/@capacitor/toast'
+  pod 'CapacitorStatusBar', :path => '../node_modules/@capacitor/status-bar'
+  pod 'CapacitorSplashScreen', :path => '../node_modules/@capacitor/splash-screen'
+end
