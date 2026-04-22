@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AI Daily">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f172a">
+<title>AI Intelligence Daily</title>
+<style>
+:root {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-2: #334155;
+  --border: #475569;
+  --text: #f1f5f9;
+  --text-sec: #94a3b8;
+  --accent: #3b82f6;
+  --accent-2: #6366f1;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --radius: 12px;
+  --radius-lg: 16px;
+}
+[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #f8fafc;
+  --surface-2: #e2e8f0;
+  --border: #cbd5e1;
+  --text: #0f172a;
+  --text-sec: #64748b;
+  --accent: #2563eb;
+  --accent-2: #4f46e5;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.5;
+  font-size: 15px; overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Loading */
+.loading-screen {
+  position: fixed; inset: 0; background: var(--bg); z-index: 1000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: opacity 0.4s, visibility 0.4s;
+}
+.loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.spinner {
+  width: 44px; height: 44px; border: 3px solid var(--surface-2);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { margin-top: 16px; color: var(--text-sec); font-size: 14px; }
+
+/* Header */
+.app-header {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e1b4b 100%);
+  padding: 60px 20px 24px; position: relative; overflow: hidden;
+}
+[data-theme="light"] .app-header {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+}
+.app-header::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 30% 50%, rgba(59,130,246,0.15) 0%, transparent 50%);
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; position: relative; z-index: 1; }
+.header-title { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+.header-date { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; position: relative; z-index: 1; }
+.header-actions { display: flex; gap: 8px; }
+.header-btn {
+  width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.1);
+  border: none; color: #fff; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; font-size: 16px; backdrop-filter: blur(10px);
+}
+
+/* Stats */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+  margin-top: 16px; position: relative; z-index: 1;
+}
+.stat-card {
+  background: rgba(255,255,255,0.08); backdrop-filter: blur(10px);
+  border-radius: var(--radius); padding: 12px; text-align: center;
+}
+.stat-num { font-size: 20px; font-weight: 700; color: #fff; }
+.stat-label { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+/* Fetch Bar */
+.fetch-bar {
+  position: sticky; top: 0; z-index: 100; background: var(--bg);
+  padding: 12px 16px; border-bottom: 1px solid var(--surface-2);
+  display: flex; gap: 10px; align-items: center;
+}
+.fetch-btn {
+  flex: 1; padding: 12px; border: none; border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.fetch-btn:active { transform: scale(0.98); }
+.fetch-btn:disabled { opacity: 0.6; }
+.fetch-btn.spinning .btn-icon { animation: spin 1s linear infinite; }
+
+/* Tabs */
+.tabs-wrap {
+  padding: 12px 16px; overflow-x: auto; scrollbar-width: none;
+  display: flex; gap: 8px; -webkit-overflow-scrolling: touch;
+}
+.tabs-wrap::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0; padding: 8px 14px; border: 1.5px solid var(--border);
+  border-radius: 20px; background: transparent; color: var(--text-sec);
+  font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+  transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+}
+.tab-btn.active {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+}
+.tab-count {
+  font-size: 11px; background: rgba(255,255,255,0.15);
+  padding: 1px 6px; border-radius: 10px; font-weight: 400;
+}
+
+/* Content */
+.content { padding: 16px; }
+.section-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0 12px; margin-bottom: 4px;
+}
+.section-icon { font-size: 22px; }
+.section-name { font-size: 17px; font-weight: 700; color: var(--accent); }
+.section-count { font-size: 12px; color: var(--text-sec); margin-left: auto; }
+
+/* Cards */
+.card {
+  background: var(--surface); border: 1px solid var(--surface-2);
+  border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 14px;
+  transition: border-color 0.2s;
+}
+.card:active { border-color: var(--accent); }
+.card-img-wrap {
+  width: 100%; height: 180px; background: var(--surface-2);
+  position: relative; overflow: hidden;
+}
+.card-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.card-placeholder {
+  width: 100%; height: 100%; display: flex; align-items: center;
+  justify-content: center; font-size: 48px; opacity: 0.15;
+  background: linear-gradient(135deg, var(--surface-2), var(--surface));
+}
+.card-body { padding: 14px; }
+.card-title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 6px; }
+.card-summary {
+  font-size: 13px; color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent);
+  padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; line-height: 1.4;
+}
+.card-detail { font-size: 13px; color: var(--text-sec); line-height: 1.5; }
+.card-footer {
+  padding: 10px 14px; border-top: 1px solid var(--surface-2);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-platform { font-size: 12px; color: var(--text-sec); display: flex; align-items: center; gap: 4px; }
+.card-link {
+  font-size: 12px; color: var(--accent); text-decoration: none;
+  font-weight: 500; display: flex; align-items: center; gap: 4px;
+}
+
+/* Empty */
+.empty-state {
+  text-align: center; padding: 60px 20px; color: var(--text-sec);
+}
+.empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.3; }
+.empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.empty-desc { font-size: 13px; }
+
+/* Toast */
+.toast-container {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  z-index: 9999; display: flex; flex-direction: column; gap: 8px; align-items: center;
+}
+.toast {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 16px;
+  font-size: 13px; color: var(--text); box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+  max-width: 280px; text-align: center;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
+
+/* Footer */
+.footer {
+  text-align: center; padding: 24px 16px 40px;
+  color: var(--text-sec); font-size: 12px; border-top: 1px solid var(--surface-2);
+}
+</style>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="spinner"></div>
+  <div class="loading-text">正在加载...</div>
+</div>
+
+<header class="app-header">
+  <div class="header-top">
+    <div>
+      <h1 class="header-title">AI Intelligence Daily</h1>
+      <div class="header-date" id="headerDate"></div>
+    </div>
+    <div class="header-actions">
+      <button class="header-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    </div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">资讯</div></div>
+    <div class="stat-card"><div class="stat-num" id="statCats">0</div><div class="stat-label">板块</div></div>
+    <div class="stat-card"><div class="stat-num" id="statTime">--:--</div><div class="stat-label">更新</div></div>
+  </div>
+</header>
+
+<div class="fetch-bar">
+  <button class="fetch-btn" id="fetchBtn" onclick="fetchData()">
+    <span class="btn-icon">📡</span>
+    <span id="fetchBtnText">抓取最新数据</span>
+  </button>
+</div>
+
+<div class="tabs-wrap" id="tabsWrap"></div>
+
+<main class="content" id="content"></main>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<footer class="footer">
+  AI Intelligence Daily · 数据来源于公开 API<br>
+  最后更新: <span id="lastUpdate">--</span>
+</footer>
+
+<script>
+const CATS = [
+  { name: "AI热点", icon: "🤖", color: "#8b5cf6" },
+  { name: "文娱热点", icon: "🎭", color: "#ec4899" },
+  { name: "审美提升", icon: "🎨", color: "#f59e0b" },
+  { name: "软件插件", icon: "🛠️", color: "#10b981" }
+];
+
+const STORAGE_KEY = "ai_daily_v2";
+const CACHE_TTL = 4 * 60 * 60 * 1000; // 4 hours
+
+let currentData = null;
+let activeTab = "all";
+
+// --- Theme ---
+function getTheme() { return localStorage.getItem("theme") || "dark"; }
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  document.getElementById("themeBtn").textContent = t === "dark" ? "🌙" : "☀️";
+  localStorage.setItem("theme", t);
+}
+function toggleTheme() { applyTheme(getTheme() === "dark" ? "light" : "dark"); }
+
+// --- Toast ---
+function showToast(msg) {
+  const c = document.getElementById("toastContainer");
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// --- Cache ---
+function saveCache(data) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ data, ts: Date.now() }));
+  } catch(e) {}
+}
+function loadCache() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) return null;
+    return data;
+  } catch(e) { return null; }
+}
+
+// --- Render ---
+function updateStats(data) {
+  document.getElementById("statTotal").textContent = data.items.length;
+  const cats = new Set(data.items.map(i => i.cat)).size;
+  document.getElementById("statCats").textContent = cats;
+  document.getElementById("statTime").textContent = new Date(data.fetched).toLocaleTimeString("zh-CN", {hour:"2-digit",minute:"2-digit"});
+  document.getElementById("headerDate").textContent = data.date;
+  document.getElementById("lastUpdate").textContent = new Date(data.fetched).toLocaleString("zh-CN");
+}
+
+function renderTabs(data) {
+  const w = document.getElementById("tabsWrap");
+  let html = `<button class="tab-btn ${activeTab==="all"?"active":""}" onclick="switchTab('all')">全部 <span class="tab-count">${data.items.length}</span></button>`;
+  for (const c of CATS) {
+    const count = data.items.filter(i => i.cat === c.name).length;
+    if (count > 0) {
+      html += `<button class="tab-btn ${activeTab===c.name?"active":""}" onclick="switchTab('${c.name}')">${c.icon} ${c.name} <span class="tab-count">${count}</span></button>`;
+    }
+  }
+  w.innerHTML = html;
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  renderTabs(currentData);
+  renderContent();
+}
+
+function renderContent() {
+  const container = document.getElementById("content");
+  const items = activeTab === "all" ? currentData.items : currentData.items.filter(i => i.cat === activeTab);
+
+  if (items.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">暂无内容</div><div class="empty-desc">点击「抓取最新数据」获取今日资讯</div></div>`;
+    return;
+  }
+
+  let html = "";
+  const catsToShow = activeTab === "all" ? CATS : CATS.filter(c => c.name === activeTab);
+
+  for (const c of catsToShow) {
+    const catItems = items.filter(i => i.cat === c.name);
+    if (catItems.length === 0) continue;
+
+    html += `<div class="section-header"><span class="section-icon">${c.icon}</span><span class="section-name">${c.name}</span><span class="section-count">${catItems.length} 条</span></div>`;
+
+    for (const item of catItems) {
+      html += `<div class="card">`;
+      if (item.img) {
+        html += `<div class="card-img-wrap"><img src="${item.img}" alt="" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'card-placeholder\\'>${c.icon}</div>'"></div>`;
+      } else {
+        html += `<div class="card-img-wrap"><div class="card-placeholder">${c.icon}</div></div>`;
+      }
+      html += `<div class="card-body">`;
+      html += `<div class="card-title">${escHtml(item.title)}</div>`;
+      if (item.summary) html += `<div class="card-summary">${escHtml(item.summary.substring(0, 100))}${item.summary.length > 100 ? "..." : ""}</div>`;
+      if (item.detail) html += `<div class="card-detail">${escHtml(item.detail.substring(0, 150))}${item.detail.length > 150 ? "..." : ""}</div>`;
+      html += `</div>`;
+      html += `<div class="card-footer">`;
+      html += `<span class="card-platform">${item.platform || ""}${item.hot ? " · 🔥"+item.hot : ""}</span>`;
+      if (item.url) html += `<a class="card-link" href="${item.url}" target="_blank" rel="noopener">查看 →</a>`;
+      html += `</div></div>`;
+    }
+  }
+
+  container.innerHTML = html;
+}
+
+function escHtml(s) {
+  const d = document.createElement("div");
+  d.textContent = s || "";
+  return d.innerHTML;
+}
+
+// --- Data Fetchers ---
+async function fetchData() {
+  const btn = document.getElementById("fetchBtn");
+  btn.disabled = true;
+  btn.classList.add("spinning");
+  document.getElementById("fetchBtnText").textContent = "抓取中...";
+  showToast("正在从各平台抓取数据...");
+
+  try {
+    const sources = [
+      fetchHuggingFace(),
+      fetchGitHubTrending(),
+      fetchGitHubTopics(),
+      fetchRSS("https://rsshub.app/36kr/newsflash", "AI热点", "36氪"),
+      fetchRSS("https://rsshub.app/bilibili/popular/all", "文娱热点", "B站热门"),
+      fetchRSS("https://rsshub.app/zhihu/hotlist", "文娱热点", "知乎热榜"),
+    ];
+
+    const results = await Promise.allSettled(sources);
+    let items = [];
+    for (const r of results) {
+      if (r.status === "fulfilled" && r.value) {
+        items = items.concat(r.value);
+      }
+    }
+
+    // Deduplicate by title
+    const seen = new Set();
+    items = items.filter(i => {
+      if (seen.has(i.title)) return false;
+      seen.add(i.title);
+      return true;
+    }).slice(0, 30);
+
+    if (items.length === 0) throw new Error("所有数据源均不可用");
+
+    currentData = {
+      date: new Date().toLocaleDateString("zh-CN", {year:"numeric",month:"long",day:"numeric"}),
+      items: items,
+      fetched: Date.now(),
+      version: "2.0"
+    };
+
+    saveCache(currentData);
+    updateStats(currentData);
+    renderTabs(currentData);
+    renderContent();
+    showToast(`✅ 抓取成功！共 ${items.length} 条`);
+
+  } catch(e) {
+    console.error("Fetch error:", e);
+    const cached = loadCache();
+    if (cached) {
+      currentData = cached;
+      updateStats(cached);
+      renderTabs(cached);
+      renderContent();
+      showToast("⚠️ 使用缓存数据（在线数据获取失败）");
+    } else {
+      showToast("❌ 数据获取失败: " + e.message);
+    }
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("spinning");
+    document.getElementById("fetchBtnText").textContent = "抓取最新数据";
+  }
+}
+
+// GitHub Trending (CORS-friendly)
+async function fetchGitHubTrending() {
+  try {
+    const res = await fetch("https://api.github.com/search/repositories?q=created:>2024-01-01&sort=stars&order=desc&per_page=8", {
+      headers: { "Accept": "application/vnd.github.v3+json" }
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.items || []).map(r => ({
+      title: r.full_name,
+      summary: r.description || "GitHub trending repository",
+      detail: `⭐ ${r.stargazers_count} · ${r.language || "N/A"} · Forks: ${r.forks_count}`,
+      cat: "AI热点",
+      platform: "GitHub",
+      url: r.html_url,
+      img: r.owner?.avatar_url || "",
+      hot: r.stargazers_count
+    }));
+  } catch(e) { return []; }
+}
+
+// HuggingFace (CORS-friendly)
+async function fetchHuggingFace() {
+  try {
+    const res = await fetch("https://huggingface.co/api/models?sort=trending&limit=6");
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.map(m => ({
+      title: m.modelId || m.id,
+      summary: "Trending model on HuggingFace",
+      detail: `📥 ${m.downloads || 0} downloads · ❤️ ${m.likes || 0} likes`,
+      cat: "AI热点",
+      platform: "HuggingFace",
+      url: `https://huggingface.co/${m.modelId}`,
+      img: "",
+      hot: m.likes || 0
+    }));
+  } catch(e) { return []; }
+}
+
+// GitHub Topics
+async function fetchGitHubTopics() {
+  try {
+    const res = await fetch("https://api.github.com/search/repositories?q=topic:ai+topic:llm&sort=updated&order=desc&per_page=6");
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.items || []).map(r => ({
+      title: r.full_name,
+      summary: r.description || "AI/LLM project on GitHub",
+      detail: `⭐ ${r.stargazers_count} · ${r.language || "N/A"}`,
+      cat: "软件插件",
+      platform: "GitHub",
+      url: r.html_url,
+      img: "",
+      hot: r.stargazers_count
+    }));
+  } catch(e) { return []; }
+}
+
+// RSS via RSSHub (CORS-friendly)
+async function fetchRSS(url, cat, platform) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const text = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, "text/xml");
+    const items = doc.querySelectorAll("item");
+    return Array.from(items).slice(0, 6).map(item => {
+      const title = item.querySelector("title")?.textContent || "";
+      const link = item.querySelector("link")?.textContent || "";
+      const desc = item.querySelector("description")?.textContent || "";
+      const cleanDesc = desc.replace(/<[^>]*>/g, "").substring(0, 120);
+      return {
+        title: title,
+        summary: cleanDesc,
+        detail: "",
+        cat: cat,
+        platform: platform,
+        url: link,
+        img: "",
+        hot: 0
+      };
+    });
+  } catch(e) { return []; }
+}
+
+// --- Init ---
+(function init() {
+  applyTheme(getTheme());
+
+  const now = new Date();
+  document.getElementById("headerDate").textContent = now.toLocaleDateString("zh-CN", {year:"numeric",month:"long",day:"numeric"});
+
+  const cached = loadCache();
+  if (cached) {
+    currentData = cached;
+    updateStats(cached);
+    renderTabs(cached);
+    renderContent();
+  }
+
+  setTimeout(() => {
+    document.getElementById("loadingScreen").classList.add("hidden");
+  }, 600);
+
+  // Auto-fetch if no cache or cache expired
+  if (!cached) {
+    setTimeout(fetchData, 1000);
+  }
+})();
+</script>
+</body>
+</html>

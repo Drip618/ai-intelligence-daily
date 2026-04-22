@@ -1,0 +1,23 @@
+{
+  "appId": "com.aiintelligence.daily",
+  "appName": "AI Intelligence Daily",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "https",
+    "cleartext": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#1a1a2e",
+      "showSpinner": true,
+      "spinnerColor": "#6366f1"
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#1a1a2e"
+    }
+  }
+}

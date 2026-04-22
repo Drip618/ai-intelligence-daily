@@ -1,0 +1,76 @@
+# AI Intelligence Agent Configuration
+
+# Model Configuration
+model:
+  provider: qwen  # openai | claude | qwen | ollama
+  api_key: ${DASHSCOPE_API_KEY}
+  model_name: qwen-turbo
+  temperature: 0.7
+  max_tokens: 4096
+
+# Scheduler Configuration
+scheduler:
+  enabled: true
+  cron: "0 9 * * *"  # Daily at 9:00 AM
+  timezone: "Asia/Shanghai"
+
+# Fetcher Configuration
+fetchers:
+  github:
+    enabled: true
+    keywords: ["AI", "LLM", "Agent", "GPT", "OpenAI"]
+    min_stars: 100
+  huggingface:
+    enabled: true
+    keywords: ["AI", "LLM", "Agent", "GPT"]
+  bilibili:
+    enabled: true
+    keywords: ["AI", "大模型", "Agent", "ChatGPT"]
+    max_results: 20
+  tiktok:
+    enabled: false
+    keywords: ["AI", "Machine Learning"]
+  douyin:
+    enabled: false
+    keywords: ["AI", "人工智能"]
+
+# Pusher Configuration
+pushers:
+  email:
+    enabled: false
+    smtp_host: ${SMTP_HOST}
+    smtp_port: 587
+    smtp_user: ${SMTP_USER}
+    smtp_password: ${SMTP_PASSWORD}
+    smtp_to: ${SMTP_TO}
+  wecom:
+    enabled: false
+    webhook_url: ${WECOM_WEBHOOK_URL}
+  dingtalk:
+    enabled: false
+    webhook_url: ${DINGTALK_WEBHOOK_URL}
+  feishu:
+    enabled: false
+    webhook_url: ${FEISHU_WEBHOOK_URL}
+  telegram:
+    enabled: false
+    bot_token: ${TELEGRAM_BOT_TOKEN}
+    chat_id: ${TELEGRAM_CHAT_ID}
+
+# Storage Configuration
+storage:
+  knowledge_path: "./data/knowledge"
+  cache_path: "./data/cache"
+  max_short_term_days: 7
+  max_long_term_items: 1000
+
+# Categories for classification
+categories:
+  - "大模型"
+  - "Agent"
+  - "Skill"
+  - "工具"
+  - "工作流"
+  - "资讯"
+  - "教程"
+  - "开源项目"

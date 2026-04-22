@@ -1,0 +1,32 @@
+{
+  "name": "ai-intelligence-daily-mobile",
+  "version": "1.0.0",
+  "description": "AI Intelligence Daily - 移动端本地应用（iOS/Android）",
+  "main": "index.js",
+  "scripts": {
+    "build:web": "cd .. && python3 generate_browser_friendly.py",
+    "init": "npx cap init ai-intelligence-daily com.aiintelligence.daily --web-dir www --web-dir www",
+    "add:ios": "npx cap add ios",
+    "add:android": "npx cap add android",
+    "sync": "npm run build:web && cp ../output/Daily_Report_*.html www/index.html 2>/dev/null; npx cap sync",
+    "open:ios": "npx cap open ios",
+    "open:android": "npx cap open android",
+    "run:ios": "npm run sync && npx cap run ios",
+    "run:android": "npm run sync && npx cap run android"
+  },
+  "keywords": ["ai", "news", "daily", "mobile"],
+  "author": "AI Intelligence Daily",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/ios": "^6.0.0",
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/toast": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0",
+    "@capacitor/splash-screen": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}
